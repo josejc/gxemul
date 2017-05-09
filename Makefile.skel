@@ -1,0 +1,30 @@
+#
+#  Makefile for mips64emul
+#
+
+CFLAGS=$(CWARNINGS) $(COPTIM) $(XDEF) $(XINCLUDE)
+BIN=mips64emul
+LIBS=-lm $(XLIB) $(OTHERLIBS)
+
+all: do_src do_devices
+	$(CC) src/*.o devices/*.o $(LIBS) -o $(BIN)
+
+do_src:
+	cd src; $(MAKE); cd ..
+
+do_devices:
+	cd devices; $(MAKE); cd ..
+
+regtest:
+	cd tests; make run_tests; cd ..
+
+clean:
+	rm -f $(BIN) *core
+	cd src; $(MAKE) clean; cd ..
+	cd devices; $(MAKE) clean; cd ..
+
+clean_all: clean
+	#  Tests are not cleaned on a normal clean, only on a clean_all.
+	cd tests; $(MAKE) clean; cd ..
+	rm -f Makefile src/Makefile devices/Makefile tests/Makefile
+

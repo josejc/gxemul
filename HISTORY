@@ -1,0 +1,639 @@
+$Id: HISTORY,v 1.119 2004/06/30 09:09:37 debug Exp $
+
+HISTORY of mips64emul
+---------------------
+
+20030829	Skeleton. ELF stuff. Some instructions.
+20030830	Simple test programs using +-*/^|&%, function calls,
+		loops, and stuff like that work.
+20030903	Adding more instructions, fixing some bugs.
+20030907	Making adding of memory mapped devices easier, although
+		the framework isn't built for speed.
+		Adding a -q switch to turn of debug output.
+20030911	Trying to fix some bugs. Minor changes. Some COP0
+		registers are now meaningful.
+20030919	Making APs (non-bootstrap cpus) available via a simple
+		'mp' device. Implementing ll/lld and sc/scd (for atomic
+		memory updates, needed by MP operating systems).
+20030923	Minor updates: more instructions (divu, mulu, lwu,
+		perhaps some more), and opcode usage statistics.
+20030924	If the next instruction is nullified (for 'branch
+		likely' type of instructions), counters for delays etc
+		are now decreased as they should.
+		Adding some comments.
+		Adding instructions: movz, movn.
+		Adding a simple mandelbrot test to mipstest.c.
+20030925	Adding instructions: bltzl, bgezl, lh, lhu, sh, mfc*,
+		mtc*.
+		Adding a dummy instructions: sync, cache.
+		Adding minimal DECstation PROM functionality: printf()
+		and getsysid() callback functions.
+		Beginning work on address translation.
+20030927	Adding some more cop0 functionality (tlb stuff).
+		Adding mc146818 real-time clock. (Skeleton stuff.)
+20030928	Adding a dc7085 serial console device (dummy, but enough
+		to output chars to the screen). NetBSD uses this for
+		the MIPSMATE 5100.
+20030929	Working on the TLB stuff.
+		Adding instructions: srlv, tlbwr, tlbr, tlbp, eret.
+20030930	Trying to find a bug which causes NetBSD to bug out, but
+		it is really hard.
+		Adding some a.out support (for loading an old
+		OpenBSD 2.8/pmax kernel image).
+		Adding instructions: lwc*, ldc*, swc1 and swc3.
+		Beginning to add special code to handle the differences
+		between R4000 (the default emulation) and R2000/R3000.
+20031001	Symbol listings produced by 'nm -S' can be used to
+		show symbolic names for addresses. (-S)
+20031002	Fixing the i/d fake cache for R2000/R3000. It's still
+		just an ugly hack, though.
+		Fixing minor bugs to make the 3100 emulation use the
+		dc device (serial console) correctly. So far, 5100 and
+		3100 are the only ones that get far enough to print
+		stuff, when booting NetBSD.
+20031004	Adding skeleton Cobalt machine emulation (-E).
+		Adding a dummy ns16550 serial controller, used by the
+		Cobalt machine emulation.
+20031006	Adding unaligned load/store instructions (lwl, lwr,
+		ldl, ldr, swl, swr, sdl, sdr), although they are not
+		tested yet.
+		Fixed a "data modified on freelist" bug when running
+		NetBSD/cobalt: setting the top bit of the index register
+		when a tlbp fails (as the R4000 manual says) isn't
+		sufficient, I had to clear the low bits as well.
+		Adding break and syscall instructions, but they are not
+		tested yet.
+		Adding a 'gt' device, faking a PCI bus, for the Cobalt
+		emulation.
+20031008	Adding initial support for HPCmips (-F), a framebuffer
+		device using X11. NetBSD/hpcmips can output pixels to
+		the framebuffer, but that's about it.
+20031009	Fixing the NetBSD/pmax bug: the "0/tftp/netbsd" style
+		bootstring was only passed correctly in the bootinfo
+		block, it needs to be passed as argv[0] as well.
+		Adding instructions: mtlo, mthi.
+		Rearrangning the source tree layout.
+		Adding console input functionality. The NetBSD/cobalt
+		kernel's ddb can now be interacted with.
+20031010	Adding experimental (semi-useless) -t option, to show
+		a function call tree while a program runs.
+		Linux/cobalt now prints a few messages, but then hangs
+		at "Calibrating delay loop..." unless an ugly hack is
+		used (setting a word of memory at 0x801e472c to non-zero).
+20031013	Adding a framebuffer device used in DECstation 3100;
+		VFB01 for mono is implemented so far, not yet the
+		VFB02 (color) variant.  Rewriting the framebuffer
+		device so that it is usable by both HPCmips and DECstation
+		emulation.
+20031014	Minor fixes. Everything should compile and run ok
+		both with and without X11.
+20031015	Adding support for ECOFF binary images; text, data,
+		and symbols are loaded. (Playing around with ultrixboot
+		and ultrix kernels.)
+20031016	The DECstation argv,argc stuff must be at 0xa0000000,
+		not 0x80000000, or Ultrix kernels complain.
+		Adding R2000/R3000 'rfe' instruction.
+		Implementing more R2K/R3K tlb specific stuff, so that
+		NetBSD boots and uses the tlb correctly, but much of
+		it is ugly. (Needs to be separated in a cleaner way.)
+		ECOFF symbols sizes are now calculated, so that offsets
+		within symbols are usable.
+20031017	DECstation bootstrings now automatically include the
+		correct name of the kernel that is booting.
+		Ultrix boots a bit.
+20031018	ELF symbols are now read automatically from the binary.
+		-t trace looks a bit better (string arguments are shown).
+		Trying to get initial R5900 stuff working (the 128-bit
+		CPU used in Playstation 2).
+		Fixing a minor bug to make the VFB02 (color framebuffer)
+		device work better, but it is still just 256 grayscales,
+		not real color. Ultrix can now use the framebuffer (it
+		calls it PMAX-CFB).
+		A machine can now consist of CPUs of different types.
+		Adding instructions: daddi, mov_xxx, mult_xx. The xxx
+		instructions are not documented MIPS64 instructions,
+		but NetBSD/playstation2 uses them. Perhaps VR5432
+		instructions?
+		Adding sign-extension to 32-bit mult.
+		Adding Playstation 2 devices: dmac (DMA controller),
+		gs (Graphic something?), and gif (graphics something
+		else, which has access to the PS2's framebuffer).
+		NetBSD/playstation2 works a bit, and prints a few
+		bootup messages.
+20031020	The cpu_type field of the cpu struct now contains
+		usable values in a much better form than before. This
+		simplifies adding of new CPU types.
+20031021	Fixing an interrupt related bug: pc_last was used, but
+		for interrupts this was incorrect. Fixed now.
+		Fixing a load/store related bug: if a load into a
+		register was aborted due to an exception, the register
+		was still modified.
+		The mc146818 rtc now reads its time from the system's
+		time() function.
+		Fixing another exception bug: if loading an instruction
+		caused an exception, something bogus happened as the
+		emulator tried to execute the instruction anyway. This
+		has been fixed now.
+20031023	Adding a quick hack which skips "while (reg --) ;"
+		kind of loops.
+		NetBSD/pmax suddenly reached userland (!), but only
+		once and attempts to repeat it have failed. I believe
+		it is problems with my interrupt handling system.
+20031024	Adding 8-bit color palette support to the framebuffer.
+		Connecting the pmax vdac device to the framebuffer's
+		rgb palette.
+		Fixing a bug in the dc device, so that console input
+		is possible; interaction with NetBSD/pmax's built-in
+		kernel debugger works now.
+		Symbol sizes for file formats where symbol size isn't
+		included are now calculated regardless of file format.
+		Physical memory space can now be smaller than 64 bits,
+		improving emulation speed a bit.
+		Doing other minor performance enhancements by moving
+		around some statements in critical parts of the code.
+20031025	Minor changes to the dc device.
+20031026	Adding support for reading symbols directly from
+		a.out files. (Works with OpenBSD/pmax binaries.)
+		Hardware devices may now register "tick functions" at
+		specific cycle intervals in a generic fashion.
+		All four channels of the dc serial controller device
+		should now work; playing around with keyboard scan
+		code generation when using the DECstation framebuffer.
+		Making various (speed) improvements to the framebuffer
+		device.
+20031027	Playing around with the sii SCSI controller.
+20031028	Minor fixes.
+		Adding an SGI emulation mode (-G), and some ARCBIOS
+		stuff, which SGIs seem to use.
+		Adding getbitmap() to the DEC prom emulation layer,
+		so some more -D x models become more usable.
+		Adding a dummy 'ssc' serial console device for
+		DECsystem 5400 emulation.
+		Playing around with TURBOchannel stuff.
+20031030	Minor fixes.
+		Adding the sub instruction. (Not tested yet?)
+		Sign-extending the results of multu, addi,addiu,
+		add,addu,sub,subu,mfcZ.
+		Adding a colorplanemask device for DECstation 3100.
+		Fixed the NetBSD/pmax bug: I had forgotten to reset
+		asid_match to 0 between tlb entry checks. :-)  Now
+		userland runs nicely...
+20031031	Fixing more bugs:  unaligned load/store could fail
+		because of an exception, but registers could be "half
+		updated". This has been fixed now.  (As a result,
+		NetBSD/pmax can now run with any of r2000,r3000,r4000,
+		r4400, or r5000.)
+		Adding some R5K and R10000 stuff.  (Note: R5K is NOT
+		R5000. Weird.)
+		Adding dummy serial console (scc) for MAXINE.
+		MAXINE also works with framebuffer, but there is no
+		color palette yet (only black and white output).
+20031101	Moving code chunks around to increase performance by
+		a few percent.
+		The opcode statistics option (-s) now shows opcode
+		names, and not just numbers. :-)
+		Fixing the bug which caused NetBSD/pmax to refuse
+		input in serial console mode, but not in keyboard/
+		framebuffer mode: the osconsole environment variable
+		wasn't set correctly.
+		Adding DEC PROM getchar() call.
+		The transmitter scanner of the dc device now scans
+		all four channels at once, for each tick, so serial
+		output is (approximately) 4 times faster.
+20031103	Adding a dummy BT459 vdac device, which does nothing
+		but allows a PMAG-BA turbochannel graphics card to be
+		used as framebuffer.
+		Several DECstation machines (-D 2, 3, and 4) can now
+		use TURBOchannel option card framebuffers as console,
+		for output. (Keyboard input is still not implemented
+		for those models.)  Only PMAG-AA (1280x1024x8) and
+		PMAG-BA (1024x864x8), both using BT459 vdac, have
+		been tested so far.
+		Modifying the X11 routines so that several framebuffer
+		windows now can be used simultaneously (if several
+		graphics option cards are to be emulated concurrently).
+20031104	DEC MIPSMATE 5100 (KN230) interrupts are shared
+		between devices. I've added an ugly hack to allow
+		that to work, which makes it possible to boot NetBSD
+		into userland with serial console.
+20031106	Removing the -S (symbol) option, as symbol files can
+		now be given in any order together with other file
+		names to be loaded.
+		cookin tipped me about using (int64_t) (int32_t)
+		casts instead of manually sign-extending values.
+		Casting sometimes increases performance, sometimes
+		decreases. It's tricky.
+		Importing mips64emul into CVS.
+20031107	Adding a generic ARC emulation mode.
+		Increasing performance of the framebuffer by not
+		updating it (or the XImage) if a write to the
+		framebuffer contains exactly what is already in it.
+		(This improves scrolling speed and initialization.)
+		Adding initial MIPS16 support.
+		Adding initial disk image support (-d command line
+		option), but this will not be used until I get some
+		kind of SCSI-controller emulation working.
+20031108	Adding the first MIPS16 instructions: "move y,X",
+		"ld y,D(x)", and "daddiu S,K" (but the last one
+		doesn't work yet).
+		Fixing the console environment variable for
+		Enough of the 'asc' controller is now implemented
+		to let NetBSD get past scsi disk detection when
+		no disk images are used.
+		DECstation machine type 2; both serial console and
+		graphical console work now.
+		Other X-windows bit-depths than 24 bits work now,
+		but colors are still not correct in non-24 bit modes.
+		Keypresses in X framebuffer windows are now
+		translated into console keypresses. (Normal keys, but
+		not cursor keys or other special keys.)
+20031111	Adding support for X11 using non-24-bit output.
+20031120	Adding X11 mouse event to emulated mouse event
+		translation, but it's not tested yet.
+		Trying to get more of the SCSI controller emulation
+		to work.
+20031124	Raw binaries can now be loaded into memory.
+20031204	Adding srec binary support.
+20031220	Adding some super-ugly arcbios emulation code.
+		Making some progress on the SGI and ARC machine
+		emulations.
+20031222	SGI and ARC progress. Multiple CPUs are now added to
+		the arcbios component tree (although NetBSD cannot
+		actually use more than one).
+20031228	Adding 'crime' and 'macepci' fake devices for SGI
+		emulation.
+		Finally implementing the cop0 'compare' register.
+		Improvements to the ns16550 device, but it is still
+		incomplete.
+		SGI userland is now reached, but interaction is broken
+		(due to the buggy ns16550).
+20031229	Adding some more instructions: teq, dsllv
+		Adding a Nintendo 64 emulation mode (skeleton).
+		Adding R4300 and R12000 to the cpu list.
+20031230	Adding bltzal, bltzall, bgezal, bgezall (not really
+		tested yet).
+		Fixing the 16550 serial controller device (by not
+		supporting fifo, so in fact it emulates a 16450
+		instead).  This causes NetBSD/sgimips to run nicely
+		into userland, sysinst, and so on.
+		Some ARC/RD94 interrupts seem to work ok now, but
+		i/o interrupts are still not correctly implemented.
+		NetBSD/arc userland is reached and can be interacted
+		with, but there's no sysinst (?).
+20040103	Trying to get some Irix stuff to work, but it's hard.
+		Fixing some Cobalt/linux problems.
+20040104	Adding a dummy 8250 device, so that Linux/sgimips can output
+		console messages.
+		Adding dmultu. (The same as dmult, so I'm not sure it's correct.
+		Perhaps dmultu is correct and dmult is wrong...)
+		Fixing a bug in unaligned load/stores of 64-bit values (a cast
+		was needed).
+		Linux/sgimips in 64-bit works a bit more than before.
+		Adding simple (polled) input functionality to dev_zs.
+		Making some progress on SGI-IP22 (IP32 still works best,
+		though).
+		Fixing the mc146818 clock device in ARC/NEC and SGI emulation
+		modes, the year field was not correct.
+		Adding a fake 'pref' instruction (lwc3).
+20040106	Separating out memory.h from misc.h.
+		Refactoring of a lot of small code fragments.
+		The PCI bus device is now shared between Cobalt, SGI, and ARC.
+		Support for RAM mirroring (dev_ram.c, not really tested yet).
+		Ugly hack to select the largest of ELF string symbol tables,
+		if there are more than one.
+		Memory hole fix for ARCBIOS, and a fix for very large (>= 4GB)
+		amounts of emulated RAM.
+		TGA (DEC 21030) PCI graphics device. NetBSD/arc can boot with
+		this card and use it as a framebuffer console.
+20040107	Adding a fix (partly incorrect) to daddi, to allow Linux/sgimips
+		to boot in 64-bit mode.
+20040108	Fixing a sll/nop bug (rd==0 for nop, not sa==0 as before).
+20040109	Trying to get an SGI-IP32 PROM image to boot.
+20040110	Faking R10000 cache things.
+		The PROM image boots, although it takes almost forever for it
+		to realize that there is no keyboard.
+		The 'gbe' SGI-IP32 graphics device works enough to display the
+		Linux framebuffer penguin in the upper left corner :-)
+20040111	-p and -P addresses can now be given as symbol names, not just
+		numeric values.
+		Experimenting with adding a PCIIDE (dev_wdc) controller to the
+		Cobalt emulation.
+20040120	Adding src/bintrans.c. No code yet, but this is a place for
+		ideas to be written down.
+		Increasing performance a little bit by inlining the check for
+		interrupts (which occurs for every instruction).
+20040124	Experimenting with pure userland (syscall) emulation.
+20040127	Fixes for compiling under Solaris.
+20040206	Some bintrans experiments.
+20040209	Adding some simple Ultrix userland emulation syscalls.
+20040211	Adding decprom_dump_txt_to_bin.c to the experiments/ dir.
+		Adding a section to doc/ on how to use DECstation PROM dumps.
+		Adding a hello world example to doc/ as well.
+20040218	TURBOchannel slots that are empty now return a DBE exception,
+		so that Ultrix and DECstation PROMs don't complain about
+		broken TURBOchannel ROMs.
+		Working some more on the machine-dependant interrupt stuff.
+20040219	Trying out some Linux/DECstation kernels (semi-successfully).
+20040222	YES! I finally found the bug that caused Linux/SGI-IP32 to only
+		work on Alpha, not on 32-bit machines.  It was a shift left,
+		probably done using 6 bits on alpha, 5 bits on 32-bit machines.
+20040223	Some minimal DEC KN5800 progress; Ultrix prints some boot
+		messages, detects 16 XMI R3000 cpus, and get a NULL panic.
+		It's all fake, though, the CPUs don't actually work.
+		Still, better than nothing :-)
+20040225	An Ultrix OSF1 kernel with a ramdisk now boots :-)  (It was
+		a problem with ultrixboot not giving the same arguments as
+		NetBSD's boot program.)
+20040225(later)	Fixing a bug in the DECstation dc serial device; digits 0-9
+		were translated to numeric keypad 0-9, not the normal 0-9.
+		(This caused Ultrix to print escape sequences instead of
+		digits.)
+20040226	Some progress on machine-dependant interrupt delivery
+		for -D7 (Maxine) and -D4, and some more 'scc' serial
+		controller featuers are implemented (but no interrupts/
+		dma/keyboard/mouse stuff yet).
+20040228	Progress on the scc controller; -D4 works in both serial
+		console mode and with keyboard (graphical console), but no
+		mouse yet.
+20040301	SGI mace interrupts are now done using the new machine-
+		independant interrupt system.
+20040303	Fixing an R5900 bug; the lowest 6 bits have special meaning
+		for coprocessor functions, not just 5 bits as on non-R5900
+		CPUs. (This fixes a bug which caused NetBSD to crash.)
+20040304	Adding enough (fake) DMA capabilities to the ioasic device
+		to allow Ultrix to print boot messages in the -D3, -D4,
+		and -D7 modes, and also print graphical console messages
+		in -D4 and -D7 modes.
+		-D11 (DEC5500) polled getchar added (to the 'ssc' device).
+		Adding the 'madd' instruction (including R5900 weird stuff).
+20040304(later)	Playstation 2's GIF can now copy 640x16 pixel chunks, allowing
+		NetBSD to scroll up the framebuffer.  The cursor also works
+		better now.
+		Playstation 2 bootinfo RTC data should now be passed correctly
+		to the running kernel.
+		DECstation rtc year should be either 72 or 73, anything else
+		will cause Ultrix to give a warning about invalid year.
+20040306	Combining playstation2's dmac, interrupt, and timer devices
+		into one (ps2_stuff).
+		Adding some R5900 instructions: mfsa, mtsa, pmfhi, pmflo, por,
+		lq, and sq.  (Most of them are just guesses, though.)
+		Implementing my own XImage putpixel routine, which can be
+		inlined... significantly faster than normal XPutPixel. :-)
+20040307	Implementing the basic functionality of a "PMAG-CA" pixelstamp
+		accellerated framebuffer device. Works with NetBSD and
+		Ultrix, but no cursor or color support.
+20040308	PMAG-CA, -DA, and -FA pixelstamps seem to work now.
+		Adding a hack to allow a pmax/mach kernel to be loaded (it's
+		a COFF file with 0 (!) sections).
+		Initial test of bt459 + framebuffer cursor support.
+20040309	Fixes/updates of dev_dec5800 and dev_ssc (and dev_decxmi) allow
+		a KN5800 Ultrix-OSF1-ramdisk kernel to boot all the way into
+		userland and be interacted with.
+		The bt459 cursor should now look semi-nice, but it is still
+		a bit fake.
+20040310	Moving the DEC CCA stuff from src/machine.c into a separate
+		device file (devices/dev_deccca.c).
+		An ugly hack added to allow some more OSF/1 kernels (almost
+		a.out, but without many of the header fields) to load.
+20040314	Adding PMAG-JA and PMAG-RO (1280x1024 x 8-bit) TURBOchannel
+		graphics devices. They work in Ultrix, but only monochrome
+		and no cursor, because there are no ramdacs or such yet.
+20040315	Pixelstamp solid fill now supports colors other than just
+		zero-fill.
+		Adding a (new) regression test skeleton.
+20040321	Some really minor updates.
+20040323	Fixes to allow SGI-IP20 and IP22 to work a bit better
+		(aliased memory), and adding "private" firmware-like vectors
+		to arcbios emul. An IP22 Irix kernel gets far enough to
+		print an assertion warning (and then double panics). :-)
+20040324	Adding a generalization hack to the SCC serial controller
+		to work with SGI-IP19 (in addition to DECstations).
+		Adding the 'sdc1' instruction.
+		Some progress on various SGI emulation modes.
+20040325	Minor updates.
+20040326	Fixed a 'madd' bug (r5900). NetBSD/playstation2 now reaches
+		userland correctly.  And a simple fix which allows NetBSD
+		timer interrupts to be triggered; NetBSD uses T_MODE_CMPE
+		(compare), while Linux uses _OVFE (overflow).
+20040328	Linux on Playstation 2 boots a bit. The Playstation 2
+		graphics controller has been extended to work better with
+		NetBSD, and to include some Linux support as well.
+		Some interrupt handling enhancements on Playstation 2,
+		needed for Linux' dma.
+		128-bit loads and stores (lq and sq) are allowed, although
+		the top half of quadwords are not modified by other
+		instructions. (Linux uses lq and sq.)
+		Big-endian X Windows servers now display correct rgb color,
+		not bgr as before.
+20040330	Some minor updates to the documentation.
+20040401	Adding a dummy ps2 OHCI device.
+20040402	Progress on the asc SCSI controller.
+20040406	Hack to allow ./configure, make to work on HP-UX B.11.00
+		on HPPA-RISC, gcc 3.3.2. (Does not work with HP's cc.)
+		More progress on the asc SCSI controller. Fixing INQUIRY,
+		adding READ_CAPACITY, adding READ. Works a bit with NetBSD
+		and some (but not all) Ultrix kernels, on DECstation type 2.
+		Adding WRITE, SYNCRONIZE_CACHE.
+		Mounting disks works in NetBSD :-)  It is a bit buggy,
+		though. Or something else is buggy.
+20040407	The bug is triggered by gunzip during NetBSD/pmax install.
+20040408	Fixing a bug (non-nul-terminated string) which caused X11
+		cursors to not display on Solaris.
+		Unneccessary X11 redraws are skipped (removes some weird
+		delays that existed before), and cursors are redrawn on
+		window exposure. (The cursor functionality has been moved
+		from dev_fb.c to x11.c.)
+20040411	Fixing the DC7085 device so that Ultrix doesn't behave weird
+		if both tx and rx interrupts occur at the same time.
+		More advancements on the asc SCSI controller.
+		More disk image filename prefixes are now recognized; c (for
+		CD-ROM, as before), d for disk, b for boot device, r for
+		read-only, and 0-7 for scsi id.
+		Mounting disks works in Ultrix. Installing to disk usually
+		crashes for various reasons, but an OSF/1 install gets
+		relatively far (similar to the NetBSD/pmax install).
+20040412	Trying to find the bug.
+20040415	Finally found and fixed the bug; SCSI reads and writes
+		(actually, any data in or data out) can be split up into
+		multiple DMA transfers. That stuff was only partially
+		implemented, and the part that was implemented was buggy.
+		It works now. NetBSD/pmax and Ultrix 4.3 seems to like
+		the SCSI stuff enough to install almost all the way.
+20040415 (more)	Adding a hack which allows a host's cdrom device to be used as
+		a cdrom device inside the emulator, eg /dev/cd0c.
+		Making the cycle counter int64_t instead of long, as a 'long'
+		overflows too easily on 32-bit machines. (The bug is still
+		there, though.)
+		I've now verified that a full NetBSD/pmax install can be done.
+		If using a PMAG-AA graphics board, startx brings up X :-)
+		mips64emul can be compiled inside NetBSD inside mips64emul,
+		and it can run NetBSD in that environment. (I'm getting
+		dizzy... :-)
+20040417	Moving some coprocessor stuff from cpu.c to coproc.c.
+20040424	Adding a BT455 vdac for PMAG-AA. Black and white are now
+		rendered correctly in Xpmax.
+		Adding colormap support to the BT459 device, for PMAG-BA.
+20040425	Fixing a buffer length bug, which caused an Ultrix 4.5
+		install to bug out on an i386 host.
+20040429	FPU experiments.
+20040502	More FPU experiments.
+		Speedup for exception debug messages:  in quiet mode, debug
+		messages were still evaluated, which took a relatively
+		large amount of time.
+20040503	Most FPU stuff fixed, but there is at least one known bug
+		left; ps axu in NetBSD triggers it (ps loops forever).
+20040504	A default install of Ultrix 4.5 succeeded! It boots up with
+		a graphical login.
+		Fixing the keyboard repetition bug (a lk201 "up" (release)
+		scancode is now sent after every key).
+20040505	Both CR and LF now produce the same lk201 scancode, so that
+		pressing 'enter' works as expected in Ultrix.
+20040506	Adding a vaddr to paddr translation cache, causing a speedup
+		of perhaps 50% or more.
+20040507	Fixing PMAG-BA color for Ultrix. (Ultrix relies on interrupts
+		coming from the TURBOchannel slot to update the palette.)
+20040508	Fixing cursor positioning for PMAG-BA.
+20040511	Prints current nr of instructions per seconds, not only
+		average, when using -N.
+20040515	Some more bintrans experiments.
+20040606	Adding ARCBIOS GetReadStatus() and Read().
+		Adding some instructions: tlt, tltu, tge, tgeu, tne.
+20040607	Adding the dsub instruction.
+		Some minimal progress on SGI-IP30 emulation.
+		Applying a patch from Juli Mallett to src/file.c (I'm not
+		sure yet if it breaks or fixes anything).
+		Some minor fixes for SGI-IP22 (such as faked board revision
+		numbers).
+20040608	ll/sc should now fail if any unrelated load/store occurs.
+		Minor changes to the configure script.
+		Adding some ifdefs around code which is not often used
+		(the mfhi/mflo delay, and the last_used TLB experimental
+		code); this might cause a tiny speedup.
+20040609	Minor fixes.
+20040610	Various minor SGI fixes (64-bit ARCS stuff, progress on the
+		CRIME/MACE interrupt system, and some other random things).
+20040611	More crime/mace progress, and some more work on pckbc.
+		KN5800 progress: adding a XMI->BI adapter device; a disk
+		controller is detected (but it is just a dummy so far).
+20040612	Adding "dev_unreadable", which simplifies making memory
+		areas unreadable. (NetBSD on SGI-IP22 no longer detects
+		non-existant hpc1 and hpc2 busses.)
+		Implementing rudimentary support for IP22 "local0" and
+		"local1" interrupts, and "mappable" local interrupts.
+		Some progress on the WDSC SCSI controller on IP22, enough
+		to let NetBSD get past the disk detection and enter
+		userland!  :-)
+		The zs (zilog serial) device now works well enough to let
+		NetBSD/sgimips be interacted with on IP22. :-)  (Though
+		it is very ugly and hardcoded.)
+20040613	IP32 didn't work last night, because there were too many
+		tick functions registered. That has been increased now.
+		Trying out NetBSD/sgimips 2.0 beta kernels. There are some
+		differences compared to 1.6.2, which I'm trying to solve.
+		Interrupt fixes for IP32: _serial and _misc are different.
+		Separation of IP22 (Full-house) and IP24 (Guiness).
+20040614	Modifying the memory layout for IP20,22,24,26 (RAM is now
+		offset by 128MB, leaving room for EISA registers and such),
+		and moving around some code chunks. This is not well
+		tested yet, but seems to work.
+		Moving parts of the tiny translation cache, as suggested
+		by Juli Mallett.  It seems that the speedup isn't as
+		apparent as it was a few weeks ago, though. :-(
+		Speedups due to not translating addresses into symbol
+		names unless the symbol name is actually printed.
+		Added support for loading old big-endian (Irix) ECOFF
+		kernels (0x60 0x01 as the first two bytes).
+20040615 (late)	Adding enough SGI IP20 (Indigo) support to let NetBSD 2.0
+		enter userland :-)  No interrupt specifics are implemented
+		yet, so it hangs while doing terminal output.
+20040618	Experimenting with the WDSC SCSI controller for IP20,22,24.
+20040620	Adding a program which converts SGI prom dumps from text
+		capture to binary, and some hacks to try to make such an
+		IP22 PROM to work better in the emulator.
+20040621	Removing the Nintendo 64 emulation mode, as it is too
+		uninteresting to support.
+		Adding SCSI tape device support (read-only, so far).
+		Fixing a bug which caused the cursor to be corrupted if new
+		data was written to the framebuffer, but the cursor wasn't
+		moved.
+20040622(early)	Finally! Making progress on the SCSI tape stuff; when going
+		past the end of a file, automagically switch to the beginning
+		of the next.
+20040622(late)	Trying to track down the last SCSI tape bugs.
+		Removing _all_ dynamic binary translation code (bintrans),
+		starting from scratch again.
+20040623(early)	Performing a general code cleanup (comments, fixing stuff
+		that led to compiler warnings, ...).
+		Disabling MIPS16 support by default, and making it a
+		configure time option to enable it (--mips16). This gives
+		a few percent speed increase overall.
+		Increasing performance by assuming that instruction loads
+		(reading from memory) will be at the same page as the last
+		load.  (Several percent speedup.)
+		Moving the list of kernels that can be found on the net from
+		README to doc/.
+20040624	Finally! I found and fixed the bug which caused 'ps', 'top',
+		'xclock', and other programs in NetBSD/pmax to behave weird.
+		Increasing performance by a few percent by running as many
+		instructions in a row as possible, before checking for
+		hardware ticks.
+		When booting from SCSI tapes on DECstation, the bootstring
+		now contains 'tz' instead of 'rz'.
+		Adding a second ARC machine mode, "Acer PICA-61", -A2.
+		Disabling the support for "instruction delays" by default
+		(it has to be enabled manually in misc.h now, but is never
+		used anywhere anyway).
+		Other minor optimizations (moving around stuff in the
+		cpu struct in misc.h, and caching cpu->pc in cpu.c).
+		Separating the tiny translation cache into two, one for
+		code and one for data. This gives a few percent speed
+		increase.
+20040625(early)	I think now is a good time for a "feature freeze",
+		to let the code stabilize and then make some kind of
+		first release.
+20040625(later)	Adding a -v (verbose) command line option. If -v is not
+		specified, the emulator goes into -q (quiet) mode just before
+		it starts to execute MIPS code.
+20040627	The configure script now adds -fomit-frame-pointer to the
+		compile flags if the $CC seems to be able to handle that.
+		Found and fixed a serious interrupt bug in BT459 (Ultrix'
+		behaviour required a hack, which was incorrect), so
+		performance for machines using the PMAG-BA framebuffer is
+		now improved.
+		For X11 bitdepths other than 8 or 24, a warning message
+		is printed at startup.
+		A number of other minor fixes, optimizations, updated
+		comments and so on.
+		Adding a BUGS file, a list of known bugs.
+		Adding a minimal man page, doc/mips64emul.1.
+20040628	Hacks for faking the existance of a second level cache
+		(ARCBIOS and other places).
+		An important fix for dc7085: tx interrupts should happen
+		before rx interrupts, not the other way around as it was
+		before. (This speeds up NetBSD boot on DECstation, and
+		fixes a bug which Ultrix triggered on heavy keyboard input.)
+		A couple of other minor fixes.
+		Framebuffer fix: there was a bug which caused the rightmost/
+		bottom pixel to sometimes not be updated, when running in
+		scaledown mode. This is now fixed.
+		Adding a small program which removes "zero holes" from
+		harddisk image files.
+20040629	More minor fixes.
+20040629(later)	Adding -A3 (NEC RISCstation 2200) (this is similar to
+		the 2250 model that NetBSD/arc can already boot all the
+		way into userland and be interacted with), and -A4
+		(Deskstation Tyne).
+		Some more minor fixes.
+20040630	Adding support for 15 and 16 bits X11 framebuffers,
+		and converting from XYPixmap to ZPixmap (this fixes the
+		problem of updates appearing in "layers" on some X
+		servers).
+		The pixels in the mouse cursor (for BT459) are now colored
+		as the emulated OS sets them, although no transparency
+		masking is done on the edges of the cursor yet. (In plain
+		English:  the mouse cursor is no longer just a white solid
+		square, you can actually see the mouse cursor image
+		on the white square.)
+
+==============  RELEASE 0.1  ==============
+

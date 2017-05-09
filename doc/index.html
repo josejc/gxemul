@@ -1,0 +1,848 @@
+<html>
+<head><title>mips64emul documentation</title>
+</head>
+<body bgcolor=#ffffff text=#000000 link=#4040f0 vlink=#404040 alink=#ff0000>
+
+<!--
+
+$Id: index.html,v 1.45 2004/06/29 16:27:20 debug Exp $
+
+Copyright (C) 2003-2004 by Anders Gavare.  All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+-->
+
+<p>
+<table width=100%>
+  <tr><td width=100% bgcolor=#808070><font color=#ffffe0 size=6>
+  <b>mips64emul</b></font></td></tr></table>
+
+<p>
+<ul>
+  <h3>User Documentation</h3>
+  <h3><a href="technical.html">Technical Documentation</a></h3>
+</ul>
+
+<p><br>
+<p>
+<table width=100%>
+  <tr><td width=100% bgcolor=#b0b0b0><font color=#8f2f2f size=4>
+	User Documentation
+  </font></td></tr>
+</table>
+
+<p>
+This "documentation" is just a collection of questions and answers
+and various bits of information. Enjoy! :-)
+
+<ul>
+  <li><a href="#overview">Overview</a>
+  <li><a href="#free">Is mips64emul free software?</a>
+  <li><a href="#emulmodes">Which machines does mips64emul emulate?</a>
+  <li><a href="#build">How to compile/build the emulator</a>
+  <li><a href="#guestos">Which guest OSes are possible to run?</a>
+  <li><a href="#use">How to use the emulator</a>
+  <li><a href="#netbsdinstall">How to install NetBSD/pmax inside the emulator</a>
+  <li><a href="#hello">Hello world</a>
+  <li><a href="#portmips">Porting operating systems to MIPS using mips64emul</a>
+  <li><a href="#disk">How to start the emulator with a disk image</a>
+  <li><a href="#userland">Running userland binaries</a>
+  <li><a href="#decrom">Using a PROM image from a DECstation</a>
+  <p>
+  <li><a href="#feedback">Feedback</a>
+</ul>
+
+
+<p><br>
+<a name="overview"></a>
+<h3>Overview:</h3>
+
+mips64emul is a MIPS machine emulator.
+
+The goals are to emulate 32-bit and 64-bit MIPS-like CPUs and enough surrounding hardware
+to fake real machines, capable of running real (unmodified) operating systems,
+such as <a href="http://www.netbsd.org/">NetBSD</a> or <a href="http://www.linux-mips.org/">Linux</a>.
+This is a spare time hobby project, and many things are not implemented yet.
+<p> 
+The emulator could be of interest for academic research and experiments, such as
+learning how to write an OS for a MIPS-based machine, or profiling SMP,
+memory usage, or system call patterns.
+<p>
+The emulator is written in C, depends on no external libraries (except X11,
+which is optional), and should compile and run on any Unix-like system. If it doesn't, that
+is to be considered a bug. No MIPS compiler toolchain is needed if the program you
+wish to run in the emulator is already in binary form. No ROM images are
+needed, the emulator will try to emulate things such as PROM calls by
+itself. However, if you have a ROM image, it might be possible to run it
+in the emulator.
+
+<p>
+(MIPS is a registered trademark of MIPS Technologies. This project is
+not affiliated with MIPS Technologies in any way whatsoever.)
+
+
+<p><br>
+<a name="free"></a>
+<h3>Is mips64emul free software?</h3>
+
+Yes, mips64emul is distributed under a free license.
+The code I have written is released under a 2-clause BSD-style license
+(or "revised BSD-style" if one wants to use
+<a href="http://www.gnu.org/philosophy/bsd.html">GNU jargon</a>.)
+<p>
+Apart from the code I have written, some files are copied from other sources such
+as NetBSD, for example header files containing symbolic names of bitfields in device
+registers. They are also covered by similar licences, but with some additional
+clauses. Please check individual files if you plan to reuse code from mips64emul.
+
+
+<p><br>
+<a name="emulmodes"></a>
+<h3>Which machines does mips64emul emulate?</h3>
+
+A few different machine types are emulated.
+The machine types that are emulated best are:
+<ul>
+  <li>DECstation/DECsystem machines, made by Digital Equipment Corp.
+  <li>Silicon Graphics MIPS-based machines
+</ul>
+<p>
+At the moment, the only machine type emulated well enough to let an
+operating system be installed onto a disk image is the DECstation.
+<p>
+Some other machine types are also emulated, but are not as close to
+running an entire OS as the machine types above are.
+<ul>
+  <li>ARC (NEC RISCstation 2250 and 2200, Acer Pica-61, and Deskstation Tyne)
+  <li>Cobalt
+  <li>Sony Playstation 2
+  <li>Handheld "hpcmips" devices
+</ul>
+<p>
+Some more notes about the list above:  The machines above all have 64-bit
+capable CPUs, except early DECstations models. There were upgrades from
+R3000 to R4000 available for some DECstations, but I think Ultrix was still
+running in 32-bit mode.  Unfortunately, even if most of these machine types have
+64-bit CPUs in them (or even 128-bit, the Playstation 2's R5900 CPU
+is a bit weird), operating systems often run in 32-bit mode on them.
+<p>
+There are other machines that use/used MIPS cpus, for example the
+Playstation (1) and the Nintendo 64 game systems, but no free OS is ported
+to those platforms as far as I know, so they might not be too interesting
+to emulate.
+<p>
+Playstation 2 is among the emulated machine types, but the emulation done
+by mips64emul is <i>not</i> suitable for playing games. Running Linux and
+NetBSD is a lot more fun :-)
+<p>
+In addition to specific machine types, a "bare" machine can be emulated.
+This mode is used when the emulator is started without specifying which
+machine type to emulate.
+A bare machine consists of one or more CPUs and a few experimental devices such
+as:
+<ul>
+  <li>a console I/O device (think putchar() and getchar()...)
+  <li>an inter-processor communication device, for SMP experiments
+</ul>
+This mode is useful if you wish to experiment with software for MIPS-like
+systems, but do not with to target any specific real-world machine type.
+
+
+<p><br>
+<a name="build"></a>
+<h3>How to compile/build the emulator:</h3>
+
+Uncompress the .tar.gz file, and run
+<pre>
+	$ <b>./configure</b>
+	$ <b>make</b>
+</pre>
+This should work on any Unix-like system. If not, please report that as
+a bug to me.  (Specific snapshots of mips64emul might have problems on
+different platforms.)
+<p>
+The emulator's performance is highly dependant on both runtime settings
+and on compiler settings, so you might want to experiment with different
+CC and CFLAGS environment variable values.
+
+
+<p><br>
+<a name="guestos"></a>
+<h3>Which guest OSes are possible to run?</h3>
+
+This table sums up the guest OSes that run well enough to be considered
+"working" in the emulator, that is, they can be installed onto some kind
+of harddisk image and be interacted with similar to a real machine:
+<p>
+  <table border="1">
+    <tr>
+      <td><b>Emulation mode:</b></td>
+      <td><b>Guest OS:</b></td>
+      <td><b>Suitable command line arguments:</b></td>
+    </tr>
+
+    <tr>
+      <td>DECstation</td>
+      <td>NetBSD/pmax</td>
+      <td>-D2 -d rootdisk_name name_of_netbsd_pmax_kernel
+	<br>(add -NX for graphical framebuffer)
+	</td>
+    </tr>
+
+    <tr>
+      <td>DECstation</td>
+      <td>Ultrix/pmax</td>
+      <td>-j -D2 -d rootdisk_name name_of_ultrix_kernel
+	<br>(add -NX for graphical framebuffer)
+	</td>
+    </tr>
+
+  </table>
+<p>
+Some other emulation modes, most notably SGI emulation modes,
+work relatively well with NetBSD, but not well enough
+to support SCSI disk images, and definitely not well enough to run Irix.
+<p>
+It is non-trivial to get a specific operating system or OS kernel to
+run in the emulator, so don't expect the list above to grow very quickly.
+<p>
+There is no guarantee that anything
+specific will run in the emulator, but NetBSD (or possibly Linux) is a
+good starting point for someone who wants to experiment. Linux kernels
+don't usually have ramdisks in them, so until some disk controller device
+has been implemented, NetBSD is the way to go if you want to reach
+userland.
+
+
+<p><br>
+<a name="use"></a>
+<h3>How to use the emulator:</h3>
+
+The emulator contains code which tries to emulate the workings of MIPS-like CPUs
+and surrounding hardware found in real machines, but no actual MIPS ROM code or
+MIPS program code.  You will need some form of program to run in the emulator.
+<p>
+You can use pre-compiled kernels (for example NetBSD or Linux), ROM images, or other programs
+that are in MIPS binary format. A couple of different file formats are supported
+(ELF, a.out, ECOFF, SREC, raw binaries).
+<p>
+As an example, let's say you want to emulate a Silicon Graphics O2 machine.
+This machine type is also known as IP32, in the SGI namespace. Let's also
+say that you want to run NetBSD on this emulated machine. A pre-compiled kernel
+for NetBSD/sgimips can be found here:
+<a href="http://ftp.sunet.se/pub/NetBSD/NetBSD-1.6.2/sgimips/binary/kernel/netbsd-INSTALL.gz">
+http://ftp.sunet.se/pub/NetBSD/NetBSD-1.6.2/sgimips/binary/kernel/netbsd-INSTALL.gz</a>
+<p>
+Once you have downloaded the kernel and gunzip'd it, you can try it out in the
+emulator like this:
+<pre>
+	$ <b>./mips64emul -G32 -CR5000 -q netbsd-INSTALL</b>
+</pre>
+-G signifies that we want SGI emulation, and 32 is the SGI-specific machine type.
+-q supresses debug messages. If everything works like it should, you should see NetBSD's boot messages...
+<pre>
+	$ <b>./mips64emul -G32 -CR5000 -q netbsd-INSTALL</b>
+	zs channel 0 had address 0xbfbd9830
+	 [ no symbols available ]
+	CPU clock speed = 3.00Mhz
+	Copyright (c) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+	    The NetBSD Foundation, Inc.  All rights reserved.
+	Copyright (c) 1982, 1986, 1989, 1991, 1993
+	    The Regents of the University of California.  All rights reserved.
+	
+	NetBSD 1.6.2 (RAMDISK) #0: Wed Feb 11 06:38:58 UTC 2004
+	    autobuild@tgm.netbsd.org:/autobuild/netbsd-1-6-PATCH002/sgimips/OBJ/autobuild/netbsd-1-6-PATCH002/src/sys/arch/sgimips/compile/RAMDISK
+	32768 KB memory, 29988 KB free, 0 for ARCS, 1740 KB in 435 buffers
+	mainbus0 (root): SGI-IP32 [SGI, 8], 1 processor
+	cpu0 at mainbus0: MIPS R5000 CPU (0x2321) Rev. 2.1 with built-in FPU Rev. 1.0
+	cpu0: 32KB/32B 2-way set-associative L1 Instruction cache, 48 TLB entries
+	cpu0: 32KB/32B 2-way set-associative write-back L1 Data cache
+	cpu0: 1024KB/16B direct-mapped write-back L2 Data cache
+	crime0 at mainbus0 addr 0x14000000: rev 1.1
+	mace0 at mainbus0 addr 0x1f000000
+	mace0: isa sts 0
+	mace0: isa msk 0
+	com0 at mace0 offset 0x390000 intr 4: ns16550a, working fifo
+	com0: console
+	com1 at mace0 offset 0x398000 intr 4: ns16550a, working fifo
+	pckbc0 at mace0 offset 0x320000 intr 5: stub
+	lpt0 at mace0 offset 0x380000 intr 4: stub
+	mcclock0 at mace0 offset 0x3a0000
+	mec0 at mace0 offset 0x280000 intr 3: MAC-110 Ethernet, rev 0
+	mec0: station address 00:00:00:00:00:00
+	mec0: sorry, this is not a real driver
+	macepci0 at mace0 offset 0x80000 intr 7: rev 1
+	macepci0: ctrl 0
+	pci0 at macepci0 bus 0
+	pci0: i/o space, memory space enabled, rd/line, rd/mult, wr/inv ok
+	biomask 7f netmask 7f ttymask 7f clockmask ff
+	md0: internal 3072 KB image area
+	boot device: <unknown>
+	root on md0a dumps on md0b
+	WARNING: clock gained 28 days -- CHECK AND RESET THE DATE!
+	root file system type: ffs
+	Terminal type? [vt100] <b>_</b>
+</pre>
+and after typing vt100 (or just pressing enter), you'll reach NetBSD's install program.
+You will not be able to install anything though, as the AHC disk controller isn't
+emulated yet.
+<p>
+To exit the emulator, type CTRL-C. By typing CTRL-B instead, a CTRL-C is sent to
+the emulated program.
+<p>
+For some emulated machine types, a graphical framebuffer console is supported.
+NetBSD/pmax (kernel found here: <a href="http://ftp.sunet.se/pub/NetBSD/NetBSD-1.6.2/pmax/binary/kernel/netbsd-INSTALL.gz">
+http://ftp.sunet.se/pub/NetBSD/NetBSD-1.6.2/pmax/binary/kernel/netbsd-INSTALL.gz</a>)
+running on an emulated DECstation 5000 supports this:
+<pre>
+	$ <b>./mips64emul -D2 -X -Y2 -I4000000 -M12 netbsd-INSTALL</b>
+</pre>
+-D2 stands for DECstation, type 2; -X means to use X-windows to get a graphical
+framebuffer; -Y2 is used to scale down the window by a factor 2x2;
+-I4000000 lets the emulated clock chip on DECstations have
+a more realistic pace; and -M12 sets the amount of emulated memory to 12 MB.
+The result should looks something like this:
+<p>
+<center>
+<img src="netbsd-pmax-framebuffer.gif">
+</center>
+<p><br>
+
+<p>
+Other operating system kernels can be downloaded from various places.
+Here are links to some of the kernels that I usually experiment with.
+(The degree to which these work in the emulator varies a lot.)
+
+<p>
+<ul>
+  <li>DECstation:
+    <ul>
+      <li>NetBSD/pmax:
+	<br><a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-1.6.2/pmax/binary/kernel/netbsd-INSTALL.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-1.6.2/pmax/binary/kernel/netbsd-INSTALL.gz</a>
+	<br><a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-1.6.2/pmax/binary/kernel/netbsd-INSTALL.symbols.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-1.6.2/pmax/binary/kernel/netbsd-INSTALL.symbols.gz</a>
+	<br>gunzip the files, and run the emulator with <b>-D2 -q -N -XY2 -I4000000</b>
+	for a graphical framebuffer console. Remove <b>-XY2</b> and <b>-N</b> to use serial (stdin/stdout) console.
+	Read <a href="#netbsdinstall">here</a> about how to install NetBSD/pmax onto a harddisk image.
+      <p>
+      <li>OpenBSD/pmax:
+	<br><a href="ftp://ftp.openbsd.org/pub/OpenBSD/2.8/pmax/bsd">ftp://ftp.openbsd.org/pub/OpenBSD/2.8/pmax/bsd</a>
+	<br>This is an old OpenBSD kernel in a.out format.
+      <p>
+      <li>Linux for DECstation:
+	<br><a href="http://www.xs4all.nl/~vhouten/mipsel/kernels.html">http://www.xs4all.nl/~vhouten/mipsel/kernels.html</a>
+	<br>Linux kernels.  Make sure you add <b>-CR4000</b> to the command line for the
+	R4000 kernel, as Linux doesn't autodetect CPU type at runtime.
+    </ul>
+  </li>
+
+  <p>
+
+  <li>SGI:
+    <ul>
+      <li>NetBSD/sgimips:
+	<br><a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-1.6.2/sgimips/binary/kernel/netbsd-INSTALL.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-1.6.2/sgimips/binary/kernel/netbsd-INSTALL.gz</a>
+	<br><a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-1.6.2/sgimips/binary/kernel/netbsd-INSTALL.symbols.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-1.6.2/sgimips/binary/kernel/netbsd-INSTALL.symbols.gz</a>
+	<br>gunzip, and try running with  <b>-G32 -CR5000</b>,
+		or <b>-G22</b> or <b>-G24</b> or <b>-G20</b>.
+      <p>
+      <li>Linux/SGI:
+	<br><a href="http://www.linux-mips.org/~glaurung/">http://www.linux-mips.org/~glaurung/</a>
+	<br>Try running with <b>-G32 -q</b>. You need to add <b>-CR5000</b> or
+		<b>-CR10000</b> to select a specific CPU type, as Linux
+		doesn't autodetect CPU at runtime, and <b>-X</b> for a graphical
+		framebuffer.
+    </ul>
+  </li>
+
+  <p>
+
+  <li>ARC:
+    <ul>
+      <li>NetBSD/arc:
+	<br><a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-1.6.2/arc/binary/kernel/netbsd.RAMDISK.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-1.6.2/arc/binary/kernel/netbsd.RAMDISK.gz</a>
+	<br><a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-1.6.2/arc/binary/kernel/netbsd.RAMDISK.symbols.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-1.6.2/arc/binary/kernel/netbsd.RAMDISK.symbols.gz</a>
+	<br>gunzip, and try with <b>-A1</b> (NEC RISCstation 2250, add <b>-X -N</b> for a graphical framebuffer),
+		<b>-A3</b> (NEC RISCstation 2200).
+	<br>(<b>-t -A2</b> (Acer PICA-61) and <b>-t -A4</b> (Deskstation Tyne) require a VGA-style 80x25 text
+		console device, which I haven't implemented yet.)
+      <p>
+      <li>Linux:
+	<br><a href="ftp://ftp.linux-mips.org/pub/linux/mips/mipsel-linux/boot/vmlinux-m700-2.1.131.gz">ftp://ftp.linux-mips.org/pub/linux/mips/mipsel-linux/boot/vmlinux-m700-2.1.131.gz</a>
+	<br>gunzip, and run with <b>-A2</b> (Acer PICA-61)
+      <p>
+      <li>OpenBSD/arc:
+	<br><a href="ftp://ftp.se.openbsd.org/pub/OpenBSD/2.3/arc/bsd.rd.elf">ftp://ftp.se.openbsd.org/pub/OpenBSD/2.3/arc/bsd.rd.elf</a>
+	<br>This is a very old OpenBSD kernel. Try running with <b>-t -A2</b> or <b>-t -A4</b>.
+		(Same problem as with netbsd, as no text console is imlemented yet.)
+    </ul>
+  </li>
+
+  <p>
+
+  <li>Cobalt:
+    <ul>
+      <li>NetBSD/cobalt:
+	<br><a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-1.6.2/cobalt/binary/kernel/netbsd-GENERIC.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-1.6.2/cobalt/binary/kernel/netbsd-GENERIC.gz</a>
+	<br>gunzip, and run with <b>-E</b>
+      <p>
+      <li>Linux:
+	<br><a href="http://people.debian.org/~pm/mips-cobalt/nfsroot/vmlinux_raq-2800.gz">http://people.debian.org/~pm/mips-cobalt/nfsroot/vmlinux_raq-2800.gz</a>
+	<br>gunzip, and run with <b>-E</b>
+    </ul>
+  </li>
+
+  <p>
+
+  <li>Playstation 2:
+    <ul>
+      <li>NetBSD/playstation2:
+	<br>A NetBSD/playstation2 snapshot kernels are available here: (RAMDISK and GENERIC)
+	<br><a href="ftp://ftp.NetBSD.org/pub/NetBSD/arch/playstation2/snapshot/20020327/installation/netbsd.gz">ftp://ftp.NetBSD.org/pub/NetBSD/arch/playstation2/snapshot/20020327/installation/netbsd.gz</a>
+	<br><a href="ftp://ftp.NetBSD.org/pub/NetBSD/arch/playstation2/snapshot/20020327/binary/kernel/netbsd-GENERIC.gz">ftp://ftp.NetBSD.org/pub/NetBSD/arch/playstation2/snapshot/20020327/binary/kernel/netbsd-GENERIC.gz</a>
+	<br>Try running with <b>-XBN</b>  (<b>-X</b> is required, for the framebuffer).
+
+      <p>
+      <li>Linux:
+	<br>A Linux kernel (2.2.21-pre1-xr7) is available from
+	<a href="http://playstation2-linux.com/projects/xrhino-kernel/">http://playstation2-linux.com/projects/xrhino-kernel/</a>
+	<br>Try running with <b>-XBN</b>  (<b>-X</b> is required, for the framebuffer).
+    </ul>
+  </li>
+</ul>
+
+
+<p><br>
+<a name="netbsdinstall"></a>
+<h3>How to install NetBSD/pmax inside the emulator</h3>
+
+To run NetBSD/pmax in the emulator (on an emulated DECstation machine), 
+you first need to install NetBSD onto a disk image. To NetBSD, the disk 
+image looks and acts like a real SCSI disk, but it is just a normal 
+file in the host's filesystem.
+<p>
+You need to do the following:
+<ol>
+  <li>Compile mips64emul:<pre>
+	$ <b>./configure; make</b>
+</pre>
+  <li>Download a NetBSD INSTALL kernel and gunzip it:<pre>
+	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-1.6.2/pmax/binary/kernel/netbsd-INSTALL.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-1.6.2/pmax/binary/kernel/netbsd-INSTALL.gz</a>
+</pre>
+  <li>Download a NetBSD CD-ROM iso image: (approx. 75 MB)<pre>
+	<a href="ftp://ftp.netbsd.org/pub/NetBSD/iso/1.6.2/pmaxcd.iso">ftp://ftp.netbsd.org/pub/NetBSD/iso/1.6.2/pmaxcd.iso</a>
+</pre>
+  <li>Create an empty harddisk image, which will be the root disk
+	that NetBSD installs itself onto:<pre>
+	$ <b>dd if=/dev/zero of=netbsd_pmax_rootdisk.img bs=1 count=512 seek=1450000000</b>
+</pre>
+  <li>Start the emulator with both the installation ISO image and the
+	root disk image, and the kernel:<pre>
+	$ <b>./mips64emul -D2 -N -XY2 -I4000000 -d netbsd_pmax_rootdisk.img -d b:pmaxcd.iso netbsd-INSTALL</b>
+</pre>
+	Alternatively, if you don't want to use a graphical framebuffer:<pre>
+	$ <b>./mips64emul -D2 -q -I4000000 -d netbsd_pmax_rootdisk.img -d b:pmaxcd.iso netbsd-INSTALL</b>
+</pre>
+	but then make sure you choose 'vt100' when prompted with which terminal
+	type to use, and not 'rcons'.
+</ol>
+
+<p>
+Then proceed like you would do if you were installing NetBSD on a real
+DECstation.  Even if the emulator is running on a very fast host system,
+you should expect the installation to take quite some time. On a
+2.8 GHz Xeon-based PC, a full install takes approximately an hour.
+
+<p>
+<font color="#ff0000">
+IMPORTANT:</font>
+Once the installation is completed, you might want to take a backup
+copy of the rootdisk image. The reason for this is that if you make
+some mistake later on, you probably don't want to go through serveral
+hours of re-installing again.
+<p>
+Then, following these steps should boot the OS from the root disk image:
+<ol>
+  <li>Download a NetBSD GENERIC kernel and gunzip it:<pre>
+	<a href="ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-1.6.2/pmax/binary/kernel/netbsd-GENERIC.gz">ftp://ftp.netbsd.org/pub/NetBSD/NetBSD-1.6.2/pmax/binary/kernel/netbsd-GENERIC.gz</a>
+</pre>
+  <li>Start the emulator with the root disk image and the GENERIC kernel:<pre>
+	$ <b>./mips64emul -D2 -qN -XY2 -I4000000 -d netbsd_pmax_rootdisk.img netbsd-GENERIC</b>
+</pre>
+</ol>
+<p>
+<font color="#ff0000">
+TODO:  As there are boot programs and kernels on both the CDROM image and 
+on the harddisk image (after installation), it should not be neccessary to 
+have separate kernels in addition to the CDROM/disk images.  It should be 
+possible to boot right of the disk image.  As of right now, that
+functionality has not been implemented.
+</font>
+<p>
+Other OSes, such as Ultrix, may be installed in a way similar to NetBSD.
+(For Ultrix, add <b>-j</b> to the command line to fake ultrixboot behaviour.
+The install kernel and generic kernels must be extracted from the installation
+CD-ROM media, by mounting that media as an ufs file system.)
+
+
+<p><br>
+<a name="hello"></a>
+<h3>Hello world:</h3>
+
+You might want to use the emulator to develop programs on your own,
+not just run precompiled kernels such as NetBSD. To get started, I'd recommend
+you do two things:
+<ul>
+  <li>Build and install a cross-compiler for MIPS.
+  <li>Compile this hello world program, and run it in the emulator.
+</ul>
+<p>
+If the emulator is launched without specifying which machine to emulate,
+it will emulate only a CPU and very few devices. One of those devices
+is a console putchar() device, at a fixed address.
+<pre>
+	/*  Hello world for mips64emul  */
+
+	#define	PUTCHAR_ADDRESS		0xb0000000
+
+	void printchar(char ch)
+	{
+		*((volatile unsigned char *) PUTCHAR_ADDRESS) = ch;
+	}
+
+	void printstr(char *s)
+	{
+		while (*s)
+			printchar(*s++);
+	}
+
+	void f(void)
+	{
+		printstr("Hello world\n");
+		for (;;)
+			;
+	}
+</pre>
+This hello world program is available here as well: <a href="hello.c">hello.c</a>
+<p>
+I'd recommend you build a GCC cross compiler for the <b>mips64-unknown-elf</b>
+target, and install it. Other compilers might work too, but GCC is good because
+of its portability. Then try to compile the hello world program:
+<pre>
+	$ <b>mips64-unknown-elf-gcc hello.c -mips4 -mabi=64 -c</b>
+	$ <b>mips64-unknown-elf-ld -Ttext 0x80030000 -e f hello.o -o hello --oformat=elf64-bigmips</b>
+	$ <b>file hello</b>
+	hello: ELF 64-bit MSB mips-4 executable, MIPS R3000_BE, version 1 (SYSV), statically linked, not stripped
+	$ <b>./mips64emul -q hello</b>
+	Hello world
+
+	$ <b>mips64-unknown-elf-gcc hello.c -c</b>
+	$ <b>mips64-unknown-elf-ld -Ttext 0x80030000 -e f hello.o -o hello</b>
+	$ <b>file hello</b>
+	hello: ELF 32-bit MSB mips-3 executable, MIPS R3000_BE, version 1 (SYSV), statically linked, not stripped
+	$ <b>./mips64emul -q hello</b>
+	Hello world
+</pre>
+As you can see above, a GCC configured for mips64-unknown-elf can produce
+both 64-bit and 32-bit binaries.
+<p>
+Hopefully this is enough to get you inspired. :-)
+
+
+<p><br>
+<a name="portmips"></a>
+<h3>Porting operating systems to MIPS using mips64emul:</h3>
+
+Is this a good idea?  The answer is yes and no, depending on what you are
+trying to port to. If you are developing an operating system or operating
+system kernel of your own, and wish to target MIPS-like systems in general,
+then the answer might be yes, for experimental purposes.
+<p>
+However, if you think that you can port an operating system
+to, say, the Silicon Graphics machine mode of mips64emul and hope that your
+operating system will run on a real SGI machine, then you will most
+likely fail. mips64emul simply does not emulate things well enough for that to work.
+Another example would be specific CPU details; if your code depends on,
+say, R10000 specifics, chances are that mips64emul will not be sufficient.
+<p>
+In many cases, hardware devices in mips64emul are only implemented well
+enough to fool for example NetBSD that they are working correctly, while in fact
+they don't work very much at all.  Please keep this in mind, if you plan
+to use mips64emul when porting your code to MIPS.
+
+
+<p><br>
+<a name="disk"></a>
+<h3>How to start the emulator with a disk image:</h3>
+
+Add <i>-d [prefixes:]diskimagefilename</i> to the command line, where prefixes
+are one or more single-character options. Run mips64emul with no command line
+arguments to get a list of possible options.
+<p>
+Here are some examples. If you want to run a NetBSD/pmax kernel on an
+emulated DECstation machine, you would use a command line such as this:
+<pre>
+	$ <b>./mips64emul -D2 -d pmax_diskimage.fs netbsd-pmax-INSTALL</b>
+</pre>
+<p>
+It is possible to have more than one disk. For each -d argument, a disk
+image is added; the first will be SCSI target 0, the second will be target 1, and so on,
+unless you specify explicitly which ID number the devices should have.
+<pre>
+	$ <b>./mips64emul -D2 -d disk0.raw -d disk1.raw -d 5:disk2.raw netbsd-pmax-INSTALL</b>
+</pre>
+Note: In the example above, disk2.raw will get scsi id 5.
+</p>
+If a filename has a 'c' prefix, or ends with ".iso", then it is assumed to be
+a CDROM device (this can be overridden with a 'd' prefix, to force a read/write disk).
+For example, the following command would start the emulator with two
+CDROM images, and one harddisk image:
+<pre>
+	$ <b>./mips64emul -D2 -d image.iso -d disk0.img -d C:second_cdrom.img netbsd-pmax-INSTALL</b>
+</pre>
+Usually, the device with the lowest id becomes the boot device. To override
+this, add a 'b' prefix to one of the devices:
+<pre>
+	$ <b>./mips64emul -D2 -d rootdisk.img -d bc:install-cd.iso name_of_kernel</b>
+</pre>
+If you have a physical CD-ROM drive on the host machine, say /dev/cd0c, you can
+use it as a CD-ROM directly accessible from within the emulator:
+<pre>
+	$ <b>./mips64emul -D2 -d rootdisk.img -d bc:/dev/cd0c name_of_kernel</b>
+</pre>
+It is probably possible to use harddisks as well this way, but I would not
+recommend it.
+<p>
+Using emulated tape drives is a bit more complicated than disks, because a
+tape can be made up of several "files" with space in between. The solution
+I have choosen is to have one file in the host's file system space for each
+tape file. The prefix for using tapes is 't', and the filename given is
+for the <i>first</i> file on that tape (number zero, implicitly). For
+files following file nr 0, a dot and the filenumber is appended to the
+filename.
+<p>
+As an example, starting the emulator with
+<pre>
+	<b>-d t4:mytape.img</b>
+</pre>
+will cause SCSI id 4 to be a tape device, using the following file number
+to name translation scheme:
+<p>
+<center>
+ <table border="0">
+  <tr>
+    <td><b>File number:</b></td>
+    <td><b>File name in the host's filesystem:</b></td>
+  </tr>
+  <tr>
+    <td align="center">0</td>
+    <td align="left">mytape.img</td>
+  </tr>
+  <tr>
+    <td align="center">1</td>
+    <td align="left">mytape.img.1</td>
+  </tr>
+  <tr>
+    <td align="center">2</td>
+    <td align="left">mytape.img.2</td>
+  </tr>
+  <tr>
+    <td align="center">..</td>
+    <td align="left">..</td>
+  </tr>
+ </table>
+</center>
+<p>
+If you already have a number of tape files, which should be placed on the
+same emulated tape, then you might not want to rename all those files.
+Use symbolic links instead (ln -s).
+<p>
+There is another advantage to using symbolic links for tape filenames:
+every time a tape is rewound, it is reopened using the filename given
+on the command line. By changing what the symbolic name points to,
+you can "switch tapes" without quiting and restarting the emulator.
+
+
+<p><br>
+<a name="userland"></a>
+<h3>Running userland binaries:</h3>
+
+You can run (some) userland programs as well. This will not emulate any
+particular machine, but instead try to translate syscalls from for example
+NetBSD/pmax into the host's OS' syscalls. For example, running /bin/hostname
+or /bin/date and similarly trivial programs from the NetBSD/pmax distribution
+works:
+<pre>
+	$ <b>./mips64emul -qu1 pmax_bin_hostname</b>
+	tab.csbnet.se
+	$ <b>./mips64emul -qu1 pmax_bin_date</b>
+	Sun Jan 25 02:26:14 GMT 2004
+	$ <b>./mips64emul -qu1 pmax_bin_sleep</b>
+	usage: pmax_bin_sleep seconds
+	$ <b>./mips64emul -qu1 pmax_bin_sleep 5</b>
+	$ <b>./mips64emul -qu1 pmax_bin_sync</b>
+</pre>
+There's also an Ultrix4 emulation mode:
+<pre>
+	$ <b>./mips64emul -qu2 ultrix4_bin_date</b>
+	UNIMPLEMENTED ultrix syscall 54
+	UNIMPLEMENTED ultrix syscall 62
+	Mon Feb  9 12:50:59 WET 2004
+	$ <b>./mips64emul -qu2 ultrix4_bin_hostname</b>
+	tab.csbnet.se
+</pre>
+Userland syscall emulation is still in its beginning stages, so almost
+nothing works.
+<p>
+Irix userland emulation might also be possible to add.
+
+
+<p><br>
+<a name="decrom"></a>
+<h3>Using a PROM image from a DECstation:</h3>
+
+<i>(The general ideas in this section applies to using ROM images from other machines as well.)</i>
+<p>
+Raw PROM images from real machines can, in a few cases, be used. One
+case which I've tried is to use a DECstation 5000/125 PROM image.
+ROM images from other machines might work as well, but ROM code is
+usually much more sensitive to correctness of the emulator than
+operating system kernels or userland programs are.
+<p>
+The image first needs to be extracted from the machine. I presume
+that these PROMs are not legal to redistribute, so you really need
+to extract the PROM from a physical machine that you own. There are
+several ways to do this.
+<ul>
+  <li>Use hardware to read the PROM chip(s) directly. Not easy if you
+	don't have such a hardware reader.
+  <li>Copy the PROM memory range into a file, from a running
+	operating system. You need a running OS, and it must
+	have access to the PROM memory range. NetBSD, for example,
+	doesn't allow that from userland.
+  <li>Hook up a serial console and dump using the PROM's own dump
+	command.
+</ul>
+<p>
+The easiest way is to hook up a serial console. The terminal must be
+able to capture output to a file.
+<p>
+These are approximately the commands that I used:
+<pre>
+        >><b>cnfg</b>                             <i>Show machine configuration</i>
+
+        >><b>printenv</b>                         <i>Show environment variables</i>
+
+        >><b>setenv more 0</b>                    <i>This turns off the More messages</i>
+
+        >><b>e -x 0xbfc00000:0xbfffffff</b>       <i>Dump the PROM data</i>
+</pre>
+<p>
+Remember that DECstations are little endian, so if the dump data
+looks like this:
+<pre>
+        bfc00000:  0x0bf0007e
+</pre>
+then the bytes in memory are actually 0x7e, 0x00, 0xf0, and 0x0b.
+<p>
+At 9600 bps, about 10KB can be dumped per minute, so it takes a while.
+Once enough of the PROM has been dumped, you can press CTRL-C to break out.
+Then, restore the more environment variable:
+<pre>
+        >><b>setenv more 24</b>
+</pre>
+<p>
+Now, convert the data you just saved (little-endian words -> bytes),
+and store in a file. Let's call this file DECstation5000_125_promdump.bin.
+<pre>
+        $ <b>./decprom_dump_txt_to_bin DECstation5000_125_promdump.txt DECstation5000_125_promdump.bin</b>
+</pre>
+This binary image can now be used in the emulator:
+<pre>
+	$ <b>./mips64emul -D3 -Q -M128 -q 0xbfc00000:DECstation5000_125_promdump.bin</b>
+
+	KN02-BA V5.7e   
+	?TFL:  3/scc/access (1:Ln1 reg-12: actual=0x00 xpctd=0x01) [KN02-BA]
+	?TFL:  3/scc/io (1:Ln0 tx bfr not empty. status=0X 0) [KN02-BA]
+	...
+	--More--?TFL: 3/scsi/cntl (CUX, cause= 1000002C)
+	>><b>?</b>
+	 ? [cmd]
+	 boot [[-z #] [-n] #/path [ARG...]]
+	 cat SCRPT
+	 cnfg [#]
+	 d [-bhw] [-S #] RNG VAL
+	 e [-bhwcdoux] [-S #] RNG
+	 erl [-c]
+	 go [ADR]
+	 init [#] [-m] [ARG...]
+	 ls [#]
+	 passwd [-c] [-s]
+	 printenv [EVN]
+	 restart
+	 script SCRPT
+	 setenv EVN STR
+	 sh [-belvS] [SCRPT] [ARG..]
+	 t [-l] #/STR [ARG..]
+	 unsetenv EVN
+	>><b>cnfg</b>
+	 3: KN02-BA  DEC      V5.7e    TCF0  (128 MB)
+	                                     (enet: 00-00-00-00-00-00)
+	                                     (SCSI = 7)
+	 0: PMAG-BA  DEC      V5.3a    TCF0
+	>><b>printenv</b>
+	 boot=
+	 testaction=q
+	 haltaction=h
+	 more=24
+	 #=3
+	 console=*
+	 osconsole=3
+	>>
+</pre>
+<i>(Note: at the moment, this doesn't work. I must have broken something when
+fixing something else, but this is what it looked like at the time.)</i>
+<p>
+During bootup, the PROM complains <i>a lot</i> about hardware failures.
+That's because the emulator doesn't emulate the hardware well enough yet.
+<p>
+The command line options used are:
+-D3 for DECstation model 3 (5000/xxx), -Q to supress the emulator's own PROM
+call emulation, -M128 for 128MB RAM (because mips64emul doesn't correctly
+emulate memory detection well enough for the PROM to accept, so it will
+always believe there is 128MB ram anyway), and -q to supress debug messages.
+The 0xbfc00000 in front of the filename tells mips64emul that it is a raw
+binary file which should be loaded at a specific virtual address.
+
+
+<p><br>
+<a name="feedback"></a>
+<h3>Feedback:</h3>
+
+If you have comments, don't hesitate to mail me at
+md1gavan @mdstud.chalmers.se.
+
+
+<hr>
+
+</body>
+</html>

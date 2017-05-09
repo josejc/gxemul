@@ -1,0 +1,143 @@
+Release notes for mips64emul 0.1
+================================
+
+Copyright (C) 2003-2004 by Anders Gavare  (md1gavan@mdstud.chalmers.se)
+
+
+This is the first official release of mips64emul.
+
+mips64emul is a MIPS machine emulator. The goals are to emulate 32-bit and
+64-bit MIPS-like CPUs and enough surrounding hardware to fake real machines,
+capable of running real (unmodified) operating systems, such as NetBSD or
+Linux.
+
+(MIPS is a registered trademark of MIPS Technologies. This project is not
+affiliated with MIPS Technologies in any way whatsoever.) 
+
+In mips64emul's current state, it is possible to emulate a DECstation well
+enough to let NetBSD/pmax install itself onto a harddisk image, in a manner
+very similar to how an install is performed on a real physical DECstation.
+(Ultrix/RISC is also possible to install this way.)
+
+Other machine types are also emulated, but not well enough yet to let an
+entire OS be installed.
+
+
+This release has a number of known bugs, listed in the BUGS file, but feel
+free to drop me a line regarding other bugs.
+
+
+Files included in this release are:
+
+  RELEASE            This file.
+
+  README             Contains quick start instructions, for the impatient ones.
+
+  LICENSE            Copyright message / license.
+
+  HISTORY            Revision history/changelog.
+
+  TODO               TODO notes.
+
+  BUGS               A list of known bugs.
+
+  src/, devices/,    Source code.
+  and include/
+
+  doc/               Documentation.
+
+  tests/             Regression tests.
+
+  experiments/       Experimental code (not needed by the emulator itself).
+
+
+and a configure + Makefile.skel combination for configuring and building the
+emulator.
+
+The following platforms and compilers have been used to build the emulator; not
+all of them have been tested for this specific release, but will most probably
+work anyway.
+
+	FreeBSD/alpha 4.9
+		gcc version 2.95.4 20020320 [FreeBSD]
+		gcc version 3.3.1 [FreeBSD]
+		gcc version 3.4 20030730 (experimental)
+		ccc 6.4.9.005-1
+
+	Linux/i386
+		gcc version 3.2.2 20030222 (Red Hat Linux 3.2.2-5)
+		gcc 3.3.4 (Linux-2.6.7, Slackware)
+
+	OpenBSD/i386 3.2
+		gcc 2.95.3 20010125 (prerelease)
+
+	OpenBSD/sparc64
+		gcc 2.95.3 20010125 (prerelease, propolice)
+
+	Solaris/sparc (SunOS 5.9)
+		cc Sun WorkShop 6 update 2 C 5.3 Patch 111679-12 2003/05/18
+		gcc version 2.95.3 20010315 (release)
+
+	NetBSD/pmax 1.6.2  (inside the emulator itself)
+		default gcc (2.9x.y) seems to work
+
+	NetBSD/i386 2.0/-current
+		gcc 3.3.3
+
+	HP-UX B.11.00
+		gcc 3.3.2  (this works, but HP-UX default cc doesn't work)
+
+	Ultrix/MIPS  (inside the emulator itself)
+		(default cc does NOT work)
+
+
+Only a few files in the include/ directory are written by me, the rest are
+from other sources (such as NetBSD).  The license text says that "All
+advertising materials mentioning features or use of this software" must
+display acknowledgements.  Even though I do NOT feel I mention features or
+use of the header files (the "software") in any advertising materials, I am
+still very greatful for the fact that these people have made their files
+freely available, so I guess thanking them like this is in order:
+
+    This product includes software developed by the University of
+    California, Berkeley and its contributors.
+
+    This product includes software developed for the
+    NetBSD Project.  See http://www.netbsd.org/ for
+    information about NetBSD.
+
+    This product includes software developed by Jonathan Stone for
+    the NetBSD Project.
+
+    This product includes software developed for the NetBSD Project
+    by Matthias Drochner.
+
+    This product includes software developed by the NetBSD
+    Foundation, Inc. and its contributors.
+
+    This product includes software developed by Christopher G. Demetriou.
+    [for the NetBSD Project.]
+
+    This product includes software developed by Adam Glass.
+
+    This product includes software developed by the PocketBSD project
+    and its contributors.
+
+    This product includes software developed by Peter Galbavy.
+
+    Carnegie Mellon University   (multiple header files,
+    no specific advertisement text required)
+
+    This product includes software developed by Charles M. Hannum.
+
+    This product includes software developed under OpenBSD by Per Fogelstrom.
+
+    This product includes software developed at Ludd, University of
+    Luleå, Sweden and its contributors.
+
+
+See individual files for details.
+
+Don't hesitate to send feedback to me. My email address is at the top of
+this file.
+

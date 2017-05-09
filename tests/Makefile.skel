@@ -1,0 +1,37 @@
+#
+#  Makefile for mips64emul tests
+#
+
+CFLAGS=$(CWARNINGS) $(COPTIM) $(XDEF) $(XINCLUDE)
+LIBS=-lm $(XLIB) $(OTHERLIBS)
+
+
+run_tests: do_tests test_common.o
+	./do_tests "$(MIPS_CC)" "$(MIPS_AS)" "$(MIPS_LD)" "../mips64emul"
+
+do_tests: do_tests.c
+	$(CC) $(CFLAGS) $(LIBS) do_tests.c -o do_tests
+
+test_common.o: test_common.c
+	$(MIPS_CC) test_common.c -c -o test_common.o
+
+#  These two (test_mips test_mips16) are the old tests.
+
+test_mips.o: test_mips.c
+	mips64-unknown-elf-gcc -g -O3 -fno-builtin -fschedule-insns -mips4 -mabi=64  -c test_mips.c -o test_mips.o
+
+test_mips16.o: test_mips.c
+	mips64-unknown-elf-gcc -g -O3 -fno-builtin -fschedule-insns -mips16 -mabi=64  -c test_mips.c -o test_mips16.o
+
+test_mips: test_mips.o
+	mips64-unknown-elf-ld -Ttext 0xffffffff80030000 -e entry_func test_mips.o -o test_mips --oformat=elf64-bigmips
+
+test_mips16: test_mips16.o
+	mips64-unknown-elf-ld -Ttext 0xffffffff80030000 -e entry_func test_mips16.o -o test_mips16 --oformat=elf64-bigmips
+
+
+clean:
+	rm -f do_tests *core
+	rm -f test_mips.o test_mips16.o test_mips test_mips16
+	rm -f test_common.o test_*.o test_*.out
+

@@ -1,0 +1,37 @@
+$Id: README,v 1.4 2004/03/26 20:15:58 debug Exp $
+
+About mips64emul's regression tests:
+
+Adding a new test should be done by writing an assembly language file called
+test_X.S, where X is the next available number, and an corresponding
+test_X.good file which contains the wanted output.  Also remember to add a
+one-liner about the test to this file!
+
+The code in test_common.c calls a function called testmain() in each test
+(which should return an int value) and prints the return value in hex.
+If a test wants to check more than one int, then it may call printhex()
+and printstr() manually, as long as the output of the program and the contents
+of test_X.good are the same.
+
+These are the tests that exist so far:
+
+------------------------------------------------------------------------------
+test_0		A "dummy" test. Copy this when creating new tests.
+test_1		Instruction: 'addu'
+------------------------------------------------------------------------------
+
+Regression test related TODOs:
+
+	o)  All instructions.
+	o)  32-bit vs 64-bit modes?
+	o)  MIPS I, II, III, IV, V (?), MDMX (?)
+	o)  MIPS16 encoding?
+	o)  32-bit vs 64-bit ELFs?
+	o)  Try the regression tests using different compilers automagically?
+	    ie gcc vs ccc vs solaris' cc...
+
+Other TODOs:
+
+	o)  Remove the usage of tmpnam(), and make do_tests.c less
+	    ugly in general.
+
