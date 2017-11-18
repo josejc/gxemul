@@ -23,7 +23,7 @@
  *  SUCH DAMAGE.
  *
  *
- *  $Id: file.c,v 1.27 2004/06/25 04:31:02 debug Exp $
+ *  $Id: file.c,v 1.29 2004/07/01 12:01:20 debug Exp $
  *
  *  This file contains functions which load executable images into (emulated)
  *  memory.  File formats recognized so far:
@@ -63,8 +63,6 @@ struct aout_symbol {
 
 
 extern uint64_t file_loaded_end_addr;
-
-char *last_filename = "not_yet_set";
 
 
 #define	unencode(var,dataptr,typ)	{				\
@@ -1134,16 +1132,26 @@ void file_load(struct memory *mem, char *filename, struct cpu *cpu)
 	FILE *f;
 	unsigned char minibuf[12];
 	int len;
+	off_t size;
 
 	assert(mem != NULL);
 	assert(filename != NULL);
-
-	last_filename = filename;
 
 	f = fopen(filename, "r");
 	if (f == NULL) {
 		file_load_raw(mem, filename, cpu);
 		return;
+	}
+
+	fseek(f, 0, SEEK_END);
+	size = ftell(f);
+	fseek(f, 0, SEEK_SET);
+
+	if (size > 24000000) {
+		fprintf(stderr, "\nThis file is very large (%lli bytes)\n",
+		    (long long)size);
+		fprintf(stderr, "Are you sure it is a kernel and not a disk image?\n");
+		exit(1);
 	}
 
 	memset(minibuf, 0, sizeof(minibuf));
